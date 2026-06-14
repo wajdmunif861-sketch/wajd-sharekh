@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة وجد الرقمية - عروض السكن</title>
+    <style>
+        body { font-family: sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 15px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 20px; position: relative; }
+        .header h1 { color: #f59e0b; margin-bottom: 5px; font-size: 24px; }
+        .logout-btn { background-color: #ef4444; color: white; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 12px; position: absolute; left: 0; top: 5px; }
+        
+        .whatsapp-setter, .filter-card { background-color: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #334155; }
+        .whatsapp-setter { border: 2px solid #22c55e; }
+        .whatsapp-setter input, .filter-card select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #334155; background-color: #0f172a; color: white; text-align: center; font-size: 16px; box-sizing: border-box; }
+        
+        .property-card { background-color: #1e293b; border-radius: 16px; overflow: hidden; margin-bottom: 25px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); border: 1px solid #334155; }
+        .image-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 10px; background-color: #0f172a; }
+        .gallery-item { position: relative; aspect-ratio: 1/1; overflow: hidden; border-radius: 6px; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .video-container { padding: 10px; background-color: #0f172a; border-top: 1px solid #233146; }
+        video { width: 100%; border-radius: 8px; max-height: 250px; background-color: black; }
+        
+        .property-details { padding: 20px; }
+        .tag { background-color: #3b82f6; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-left: 5px; display: inline-block; }
+        .tag-cat { background-color: #ec4899; }
+        .price { color: #22c55e; font-size: 20px; font-weight: bold; float: left; }
+        .title { font-size: 18px; margin: 15px 0 10px; color: #f8fafc; }
+        .notes-box { background-color: #020617; padding: 10px; border-radius: 8px; font-size: 13px; color: #f59e0b; border-right: 4px solid #f59e0b; margin-bottom: 15px; }
+        .model-title { font-size: 14px; color: #94a3b8; margin: 10px 0 5px; font-weight: bold; }
+        .ad-textarea { width: 100%; height: 90px; background-color: #0f172a; padding: 10px; border-radius: 8px; color: #cbd5e1; font-size: 13px; line-height: 1.5; border: 1px solid #475569; resize: vertical; box-sizing: border-box; }
+        
+        .btn { padding: 12px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; text-align: center; font-size: 13px; width: 100%; box-sizing: border-box; display: block; margin-top: 6px; text-decoration: none; }
+        .btn-copy { background-color: #f59e0b; color: #0f172a; }
+        .btn-whatsapp-share { background-color: #22c55e; color: white; }
+        .btn-download-all { background-color: #0284c7; color: white; font-size: 13px; }
+        .btn-location { background-color: #6366f1; color: white; margin-top: 12px; }
+        .warning-text { color: #ef4444; font-size: 13px; font-weight: bold; text-align: center; margin-top: 5px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/logout" class="logout-btn">خروج 🚪</a>
+            <h1>منصة وجد الرقمية 🏢</h1>
+            <p>لوحة المسوق - تدعم الصور والفيديوهات</p>
+        </div>
+
+        <div class="whatsapp-setter">
+            <h4 style="margin: 0 0 10px 0; color: #22c55e; text-align: center;">🟢 رقم الواتساب الخاص بك للتواصل المباشر:</h4>
+            <input type="text" id="global-phone" placeholder="اكتب رقمك بدون أصفار (مثال: 971501234567)" oninput="savePhone()">
+            <div id="phone-warning" class="warning-text">⚠️ يرجى كتابة رقمك أولاً لتفعيل روابط الإعلانات والمشاركة!</div>
+        </div>
+
+        <div class="filter-card">
+            <h4 style="margin: 0 0 10px 0; color: #f59e0b; text-align: center;">🔍 تصفية سريعة حسب فئة السكن:</h4>
+            <select id="category-filter" onchange="filterProperties()">
+                <option value="all">عرض جميع الفئات والمتاح الكل 🌍</option>
+                <option value="شباب">سكن شباب فقط 🧑</option>
+                <option value="بنات">سكن بنات فقط 👧</option>
+                <option value="عائلي">سكن عائلي فقط 👨‍👩‍👧‍👦</option>
+                <option value="ميكس">سكن ميكس فقط 🔄</option>
+            </select>
+        </div>
+
+        {% if not properties %}
+            <p style="text-align: center; color: #94a3b8;">لا توجد عروض سكن متاحة حالياً.</p>
+        {% endif %}
+
+        {% for prop in properties %}
+        <div class="property-card" data-category="{{ prop.category }}">
+            
+            {% if prop.images %}
+            <div class="image-gallery">
+                {% for img in prop.images %}
+                <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='uploads/' + img) }}" class="prop-img-file">
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <div style="padding: 20px; text-align: center; color: #94a3b8;">📸 لا توجد صور لهذا العرض</div>
+            {% endif %}
+
+            {% if prop.video_path %}
+            <div class="video-container">
+                <video controls preload="metadata">
+                    <source src="{{ url_for('static', filename='uploads/' + prop.video_path) }}" type="video/mp4">
+                    متصفحك لا يدعم تشغيل مقاطع الفيديو الحالية.
+                </video>
+            </div>
+            {% endif %}
+            
+            <div class="property-details">
+                <span class="price">{{ prop.price }} درهم</span>
+                <span class="tag">{{ prop.region }}</span>
+                <span class="tag tag-cat">سكن {{ prop.category }} 👥</span>
+                
+                <div class="title">{{ prop.type }} ({{ prop.category }}) في منطقة {{ prop.region }}</div>
+                
+                {% if prop.notes %}
+                    <div class="notes-box">💡 <b>ملاحظة للمسوق:</b> {{ prop.notes }}</div>
+                {% endif %}
+
+                <div class="model-title">📋 نموذج إعلاني 1:</div>
+                <textarea class="ad-textarea" id="m1-{{ prop.id }}">🔥 عرض مميز للإيجار في {{ prop.region }}!
+متاح الآن [ {{ prop.type }} ] مخصص لـ ( سكن {{ prop.category }} ).
+💰 السعر: {{ prop.price }} درهم شهرياً.
+احجز مكانك الآن وتواصل معنا فورا!</textarea>
+                <button class="btn btn-copy" onclick="copyModel('m1-{{ prop.id }}')">📋 نسخ الاعلان مع رابط الواتساب</button>
+                <button class="btn btn-whatsapp-share" onclick="shareAndDownload('m1-{{ prop.id }}', this)">🚀 مشاركة الاعلان على الواتساب مع تحميل الصور</button>
+                {% if prop.images %}
+                    <button class="btn btn-download-all" onclick="downloadAllImages(this)">📸 تحميل الصور دفعة واحدة للموديل</button>
+                {% endif %}
+
+                <div class="model-title">📋 نموذج إعلاني 2:</div>
+                <textarea class="ad-textarea" id="m2-{{ prop.id }}">للإيجار في الشارقة - {{ prop.region }}.
+نوع العقار: {{ prop.type }} ( سكن {{ prop.category }} ).
+السعر المطلوب: {{ prop.price }} درهم إماراتي.
+للتفاصيل الكاملة يرجى مراسلتنا بالضغط على الرابط أدناه.</textarea>
+                <button class="btn btn-copy" onclick="copyModel('m2-{{ prop.id }}')">📋 نسخ الاعلان مع رابط الواتساب</button>
+                <button class="btn btn-whatsapp-share" onclick="shareAndDownload('m2-{{ prop.id }}', this)">🚀 مشاركة الاعلان على الواتساب مع تحميل الصور</button>
+                {% if prop.images %}
+                    <button class="btn btn-download-all" onclick="downloadAllImages(this)">📸 تحميل الصور دفعة واحدة للموديل</button>
+                {% endif %}
+
+                <div class="model-title">📋 نموذج إعلاني 3:</div>
+                <textarea class="ad-textarea" id="m3-{{ prop.id }}">فرصة سكن لقطة في {{ prop.region }} لا تعوض 📢!
+سكن مريح، مناسب لـ ( سكن {{ prop.category }} - {{ prop.type }} ) جاهز للاستلام الفوري.
+السعر مغري جداً: {{ prop.price }} درهم فقط شهرياً!</textarea>
+                <button class="btn btn-copy" onclick="copyModel('m3-{{ prop.id }}')">📋 نسخ الاعلان مع رابط الواتساب</button>
+                <button class="btn btn-whatsapp-share" onclick="shareAndDownload('m3-{{ prop.id }}', this)">🚀 مشاركة الاعلان على الواتساب مع تحميل الصور</button>
+                {% if prop.images %}
+                    <button class="btn btn-download-all" onclick="downloadAllImages(this)">📸 تحميل الصور دفعة واحدة للموديل</button>
+                {% endif %}
+
+                {% if prop.location_url %}
+                    <button class="btn btn-location" onclick="copyToClipboard('{{ prop.location_url }}', 'تم نسخ رابط اللوكيشن للحافظة بنجاح! 📍')">📋 نسخ رابط اللوكيشن للحافظة مباشرة</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        window.onload = function() {
+            var savedPhone = localStorage.getItem('marketer_phone');
+            if(savedPhone) {
+                document.getElementById('global-phone').value = savedPhone;
+                document.getElementById('phone-warning').style.display = 'none';
+            } else {
+                document.getElementById('phone-warning').style.display = 'block';
+            }
+        }
+
+        function savePhone() {
+            var phoneInput = document.getElementById('global-phone').value.trim();
+            localStorage.setItem('marketer_phone', phoneInput);
+            if(phoneInput !== "") {
+                document.getElementById('phone-warning').style.display = 'none';
+            } else {
+                document.getElementById('phone-warning').style.display = 'block';
+            }
+        }
+
+        function filterProperties() {
+            var selectedCategory = document.getElementById('category-filter').value;
+            var cards = document.querySelectorAll('.property-card');
+            
+            cards.forEach(function(card) {
+                var cardCategory = card.getAttribute('data-category');
+                if(selectedCategory === 'all' || cardCategory === selectedCategory) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function generateFinalText(textareaId) {
+            var text = document.getElementById(textareaId).value;
+            var phone = document.getElementById('global-phone').value.trim();
+            
+            if(phone !== "") {
+                var cleanPhone = phone.replace(/[^0-9]/g, '');
+                var whatsappLink = "https://wa.me/" + cleanPhone;
+                return text + "\n\n" + whatsappLink;
+            } else {
+                return text;
+            }
+        }
+
+        function copyToClipboard(text, successMessage) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert(successMessage);
+            });
+        }
+
+        function copyModel(textareaId) {
+            var phone = document.getElementById('global-phone').value.trim();
+            if(phone === "") {
+                alert("⚠️ يرجى كتابة رقم الواتساب الخاص بك في الأعلى أولاً لحفظ الرابط والنسخ بالشكل الصحيح!");
+                return;
+            }
+            var finalText = generateFinalText(textareaId);
+            copyToClipboard(finalText, "تم نسخ نص الإعلان مع رابط الواتساب النظيف تماماً إلى الحافظة! 🚀");
+        }
+
+        function shareAndDownload(textareaId, button) {
+            var phone = document.getElementById('global-phone').value.trim();
+            if(phone === "") {
+                alert("⚠️ يرجى كتابة رقم الواتساب الخاص بك في الأعلى أولاً للمشاركة وتفعيل الرابط!");
+                return;
+            }
+
+            var finalText = generateFinalText(textareaId);
+            navigator.clipboard.writeText(finalText);
+
+            const card = button.closest('.property-card');
+            const images = card.querySelectorAll('.prop-img-file');
+            const originalText = button.innerText;
+
+            if (images.length > 0) {
+                images.forEach((img, index) => {
+                    setTimeout(() => {
+                        button.innerText = `⏳ جاري حفظ صورة (${index + 1} من ${images.length}) وتجهيز الواتساب...`;
+                        button.style.backgroundColor = "#eab308";
+                        
+                        const link = document.createElement('a');
+                        link.href = img.src;
+                        link.download = `صورة_تسويق_${index + 1}.jpg`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        if(index === images.length - 1) {
+                            setTimeout(() => {
+                                button.innerText = originalText;
+                                button.style.backgroundColor = "#22c55e";
+                                
+                                alert("تم نسخ النص وحفظ الصور بنجاح! سيتجه هاتفك الآن للواتساب تلقائياً، يرجى اختيار جهة الاتصال وإرفاق الصور من الألبوم ولصق النص المنسوخ 🚀");
+                                var whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(finalText);
+                                window.open(whatsappUrl, '_blank');
+                            }, 600);
+                        }
+                    }, index * 400); 
+                });
+            } else {
+                var whatsappUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(finalText);
+                window.open(whatsappUrl, '_blank');
+            }
+        }
+
+        function downloadAllImages(button) {
+            const card = button.closest('.property-card');
+            const images = card.querySelectorAll('.prop-img-file');
+            if (images.length === 0) return;
+
+            const originalText = button.innerText;
+            
+            images.forEach((img, index) => {
+                setTimeout(() => {
+                    button.innerText = `⏳ جاري تنزيل صورة (${index + 1} من ${images.length})...`;
+                    button.style.backgroundColor = "#eab308";
+                    
+                    const link = document.createElement('a');
+                    link.href = img.src;
+                    link.download = `صورة_عرض_${index + 1}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    if(index === images.length - 1) {
+                        setTimeout(() => {
+                            button.innerText = originalText;
+                            button.style.backgroundColor = "#0284c7";
+                            alert("تم تحميل كافة الصور بنجاح داخل ألبوم التنزيلات العادي في جهازك! 🎉");
+                        }, 500);
+                    }
+                }, index * 400); 
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - المدير وجد</title>
+    <style>
+        body { font-family: sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 15px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .card { background-color: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h2 { color: #f59e0b; margin-top: 0; text-align: center; }
+        label { display: block; margin: 10px 0 5px; color: #94a3b8; }
+        select, input, textarea, button { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; }
+        button { background-color: #f59e0b; color: #0f172a; font-weight: bold; cursor: pointer; border: none; margin-top: 10px; }
+        .status-btn { padding: 6px 12px; border-radius: 20px; font-size: 14px; border: none; color: white; cursor: pointer; text-decoration: none; display: inline-block; }
+        .available { background-color: #22c55e; }
+        .rented { background-color: #ef4444; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: right; border-bottom: 1px solid #334155; font-size: 14px; }
+        th { color: #f59e0b; }
+        .logout { background-color: #ef4444; color: white; text-align: center; text-decoration: none; display: block; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/logout" class="logout-btn logout">تسجيل الخروج 🚪</a>
+        <div class="card">
+            <h2>إضافة عرض سكن جديد 🏢</h2>
+            <form action="/admin-dashboard" method="POST" enctype="multipart/form-data">
+                <label>المنطقة:</label>
+                <select name="region">
+                    <option value="المجاز 1">المجاز 1</option>
+                    <option value="المجاز 2">المجاز 2</option>
+                    <option value="المجاز 3">المجاز 3</option>
+                    <option value="التعاون">التعاون</option>
+                    <option value="القاسمية">القاسمية</option>
+                    <option value="ميسلون">ميسلون</option>
+                    <option value="النهدة الشارقة">النهدة الشارقة</option>
+                    <option value="ابو شغارة">ابو شغارة</option>
+                    <option value="مويلح">مويلح</option>
+                    <option value="الخان">الخان</option>
+                    <option value="دبي">دبي</option>
+                </select>
+
+                <label>نوع السكن:</label>
+                <select name="type">
+                    <option value="سرير">سرير</option>
+                    <option value="بارتشن">بارتشن</option>
+                    <option value="غرفة عادية">غرفة عادية</option>
+                    <option value="استديو">استديو</option>
+                    <option value="ميدروم بحمام خاص">ميدروم بحمام خاص</option>
+                    <option value="غرفة ماستر">غرفة ماستر</option>
+                </select>
+
+                <label>تصنيف السكن المستهدف 👥:</label>
+                <select name="category">
+                    <option value="شباب">شباب 🧑</option>
+                    <option value="بنات">بنات 👧</option>
+                    <option value="عائلي">عائلي 👨‍👩‍👧‍👦</option>
+                    <option value="ميكس">ميكس 🔄</option>
+                </select>
+
+                <label>السعر الإجمالي (درهم):</label>
+                <input type="number" name="price" placeholder="مثال: 2500" required>
+
+                <label>رابط اللوكيشن (Google Maps):</label>
+                <input type="url" name="location_url" placeholder="ضع رابط الخريطة هنا">
+
+                <label>ملاحظات داخلية للمسوقين:</label>
+                <textarea name="notes" placeholder="اكتب أي ملاحظات إضافية..."></textarea>
+
+                <label>صور العقار (يمكن تحديد مجموعة صور معاً) 📸:</label>
+                <input type="file" name="images" accept="image/*" multiple required>
+
+                <label>فيديو توضيحي للعقار (اختياري) 🎥:</label>
+                <input type="file" name="video" accept="video/*">
+
+                <button type="submit">نشر وتوليد العرض بالصور والفيديو 🚀</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>إدارة المتاح والمؤجر ⚙️</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>العقار</th>
+                        <th>السعر</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prop in properties %}
+                    <tr>
+                        <td>{{ prop[2] }} ({{ prop[6] }}) - {{ prop[1] }}</td>
+                        <td>{{ prop[3] }} د.إ</td>
+                        <td>
+                            <a href="/toggle-status/{{ prop[0] }}" class="status-btn {% if prop[7] == 'متاح' %}available{% else %}rented{% endif %}">
+                                {{ prop[7] }}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card" style="border: 1px solid #3b82f6;">
+            <h2 style="color: #3b82f6;">حسابات وبيانات المسوقين 🔐</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>المسوق</th>
+                        <th>كلمة المرور الخاصة به</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for marketer in marketers %}
+                    <tr>
+                        <td style="color: #f8fafc; font-weight: bold;">{{ marketer[0] }}</td>
+                        <td style="color: #60a5fa;">{{ marketer[1] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
